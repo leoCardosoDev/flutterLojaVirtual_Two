@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lojaflutter/config/config.dart';
+import 'package:lojaflutter/screens/base/base_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -9,12 +11,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Loja Virtual',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: primaryColor,
       ),
-      home: Container(
-        color: Colors.white,
-      ),
+      home: BaseScreen(),
     );
   }
 }
