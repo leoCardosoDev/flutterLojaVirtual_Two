@@ -3,14 +3,14 @@ import 'package:lojaflutter/config/config.dart';
 import 'package:lojaflutter/helpers/validators.dart';
 import 'package:lojaflutter/models/user.dart';
 import 'package:lojaflutter/models/user_manager.dart';
+import 'package:lojaflutter/screens/login/login_screen.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatelessWidget {
+class SignUpScreen extends StatelessWidget {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final User user = User();
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class LoginScreen extends StatelessWidget {
           child: Form(
             key: _formKey,
             child: Consumer<UserManager>(
-              builder: (_, userManager, child) {
+              builder: (_, userMannager, __) {
                 return Container(
                   padding: const EdgeInsets.only(left: 16, right: 16),
                   child: Column(
@@ -32,28 +32,51 @@ class LoginScreen extends StatelessWidget {
                         children: <Widget>[
                           const SizedBox(height: 50),
                           Text(
-                            'Bem-Vindo!',
+                            'Criar conta',
                             style: TextStyle(
                                 fontSize: 26,
                                 fontWeight: FontWeight.bold,
                                 color: secondaryColor),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Entre para continuar',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: secondaryColor,
-                            ),
-                          ),
                         ],
                       ),
-                      const SizedBox(height: 75),
+                      const SizedBox(height: 25),
                       Column(
                         children: <Widget>[
                           TextFormField(
-                            enabled: !userManager.loading,
-                            controller: _emailController,
+                            enabled: !userMannager.loading,
+                            style: TextStyle(color: secondaryColor),
+                            cursorColor: secondaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Nome Completo',
+                              labelStyle: TextStyle(
+                                  fontSize: 14, color: secondaryColor),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: secondaryColor),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                            ),
+                            autocorrect: false,
+                            validator: (name) {
+                              if (name.isEmpty) {
+                                return 'Campo obrigatório';
+                              } else if (name.trim().split(' ').length <= 1) {
+                                return 'Preencha seu nome completo';
+                              } else {
+                                return null;
+                              }
+                            },
+                            onSaved: (name) => user.name = name,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            enabled: !userMannager.loading,
                             style: TextStyle(color: secondaryColor),
                             cursorColor: secondaryColor,
                             decoration: InputDecoration(
@@ -74,17 +97,19 @@ class LoginScreen extends StatelessWidget {
                             keyboardType: TextInputType.emailAddress,
                             autocorrect: false,
                             validator: (email) {
-                              if (!emailValidator(email)) {
+                              if (email.isEmpty) {
+                                return 'E-mail obrigatório';
+                              } else if (!emailValidator(email)) {
                                 return 'E-mail inválido!';
                               } else {
                                 return null;
                               }
                             },
+                            onSaved: (email) => user.email = email,
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
-                            enabled: !userManager.loading,
-                            controller: _passwordController,
+                            enabled: !userMannager.loading,
                             style: TextStyle(color: secondaryColor),
                             cursorColor: secondaryColor,
                             decoration: InputDecoration(
@@ -105,29 +130,75 @@ class LoginScreen extends StatelessWidget {
                             autocorrect: false,
                             obscureText: true,
                             validator: (pass) {
-                              if (pass.isEmpty || pass.length < 5) {
+                              if (pass.isEmpty) {
+                                return 'Campo obrigatório';
+                              } else if (pass.isEmpty || pass.length < 5) {
                                 return 'Senha inválida';
                               } else {
                                 return null;
                               }
                             },
+                            onSaved: (pass) => user.password = pass,
                           ),
-                          child,
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            enabled: !userMannager.loading,
+                            style: TextStyle(color: secondaryColor),
+                            cursorColor: secondaryColor,
+                            decoration: InputDecoration(
+                              labelText: 'Repita a Senha',
+                              labelStyle: TextStyle(
+                                  fontSize: 14, color: secondaryColor),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: secondaryColor),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                            ),
+                            autocorrect: false,
+                            obscureText: true,
+                            validator: (pass) {
+                              if (pass.isEmpty) {
+                                return 'Campo obrigatório';
+                              } else if (pass.isEmpty || pass.length < 5) {
+                                return 'Senha inválida';
+                              } else {
+                                return null;
+                              }
+                            },
+                            onSaved: (pass) => user.confirmedPassword = pass,
+                          ),
                           const SizedBox(height: 20),
                           Container(
                             height: 50,
                             width: double.infinity,
                             child: FlatButton(
                               disabledColor: primaryColor,
-                              onPressed: userManager.loading
+                              onPressed: userMannager.loading
                                   ? null
                                   : () {
                                       if (_formKey.currentState.validate()) {
-                                        userManager.signIn(
-                                          user: User(
-                                              email: _emailController.text,
-                                              password:
-                                                  _passwordController.text),
+                                        _formKey.currentState.save();
+                                        if (user.password !=
+                                            user.confirmedPassword) {
+                                          _scaffoldKey.currentState
+                                              .showSnackBar(SnackBar(
+                                            content: const Text(
+                                              'Senhas não coincidem',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            backgroundColor: Colors.red,
+                                          ));
+                                        }
+                                        userMannager.signUp(
+                                          user: user,
                                           onFail: (e) {
                                             _scaffoldKey.currentState
                                                 .showSnackBar(SnackBar(
@@ -166,13 +237,13 @@ class LoginScreen extends StatelessWidget {
                                 child: Container(
                                   width: double.infinity,
                                   alignment: Alignment.center,
-                                  child: userManager.loading
+                                  child: userMannager.loading
                                       ? const CircularProgressIndicator(
                                           valueColor: AlwaysStoppedAnimation(
                                               Colors.white),
                                         )
                                       : Text(
-                                          'Entrar',
+                                          'Criar Conta',
                                           style: TextStyle(
                                             color: primaryColor,
                                             fontSize: 18,
@@ -205,7 +276,7 @@ class LoginScreen extends StatelessWidget {
                                     width: 10,
                                   ),
                                   Text(
-                                    'Entre com o Facebook',
+                                    'Criar conta com o Facebook',
                                     style: TextStyle(
                                         color: Colors.indigo,
                                         fontWeight: FontWeight.bold),
@@ -223,17 +294,19 @@ class LoginScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              'Novo por aqui? ',
+                              'Já tem conta? ',
                               style: TextStyle(color: secondaryColor),
                             ),
                             FlatButton(
                               onPressed: () {
-                                Navigator.of(context)
-                                    .pushReplacementNamed('/signup');
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => LoginScreen()));
                               },
                               padding: EdgeInsets.zero,
                               child: Text(
-                                ' Crie uma conta!',
+                                ' Faça o login!',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: secondaryColor),
@@ -246,21 +319,6 @@ class LoginScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: Align(
-                alignment: Alignment.topRight,
-                child: FlatButton(
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  child: Text(
-                    'Esqueceu a Senha?',
-                    style: TextStyle(
-                      color: secondaryColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
             ),
           ),
         ),
