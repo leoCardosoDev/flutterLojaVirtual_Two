@@ -9,13 +9,32 @@ class ProductManager extends ChangeNotifier {
     _loadingAllProducts();
   }
 
-  List<Product> allProducts = [];
+  List<Product> _allProducts = [];
+  String _search = '';
+  String get search => _search;
+
+  set search(String value) {
+    _search = value;
+    notifyListeners();
+  }
+
+  List<Product> get filteredProducts {
+    final List<Product> filteredProducts = [];
+    if (search.isEmpty) {
+      filteredProducts.addAll(_allProducts);
+    } else {
+      filteredProducts.addAll(_allProducts.where((products) =>
+          products.name.toLowerCase().contains(search.toLowerCase())));
+    }
+
+    return filteredProducts;
+  }
 
   Future<void> _loadingAllProducts() async {
     final QuerySnapshot querySnapshot =
         await _firestore.collection('products').getDocuments();
 
-    allProducts = querySnapshot.documents
+    _allProducts = querySnapshot.documents
         .map((document) => Product.fromDocument(document))
         .toList();
 
