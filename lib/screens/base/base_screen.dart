@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lojaflutter/common/custom_drawer/custom_drawer.dart';
 import 'package:lojaflutter/config/config.dart';
 import 'package:lojaflutter/models/page_manager.dart';
+import 'package:lojaflutter/screens/products/products_screen.dart';
 import 'package:provider/provider.dart';
 
 class BaseScreen extends StatelessWidget {
@@ -22,13 +23,7 @@ class BaseScreen extends StatelessWidget {
               iconTheme: IconThemeData(color: secondaryColor),
             ),
           ),
-          Scaffold(
-            drawer: CustomDrawer(),
-            appBar: AppBar(
-              title: const Text('Produtos'),
-              iconTheme: IconThemeData(color: secondaryColor),
-            ),
-          ),
+          ProductsScreen(),
           Scaffold(
             drawer: CustomDrawer(),
             appBar: AppBar(
